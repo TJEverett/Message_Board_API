@@ -12,6 +12,8 @@ namespace MessageBoard.Models
     [Required]
     [StringLength(256)]
     public string Content { get; set; }
+    [Required]
+    public int GroupId { get; set; }
     public DateTime Date { get; set; }
   }
 }
