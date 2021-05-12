@@ -31,5 +31,12 @@ namespace MessageBoard.Controllers
       _db.Groups.Add(group);
       _db.SaveChanges();
     }
+
+    //GET api/groups/5
+    [HttpGet("{id}")]
+    public ActionResult<Group> Get(int id)
+    {
+      return _db.Groups.FirstOrDefault(entry => entry.GroupId == id);
+    }
   }
 }
