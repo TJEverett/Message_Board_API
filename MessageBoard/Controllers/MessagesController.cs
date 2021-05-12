@@ -20,9 +20,31 @@ namespace MessageBoard.Controllers
 
     //GET api/messages
     [HttpGet]
-    public ActionResult<IEnumerable<Message>> Get()
+    public ActionResult<IEnumerable<Message>> Get(int groupId, string userName, DateTime afterDate, DateTime beforeDate)
     {
-      return _db.Messages.ToList();
+      var query = _db.Messages.AsQueryable();
+
+      if(groupId > 0)
+      {
+        query = query.Where(entry => entry.GroupId == groupId);
+      }
+
+      if(userName != null)
+      {
+        query = query.Where(entry => entry.UserName == userName);
+      }
+
+      if(afterDate != DateTime.MinValue)
+      {
+        query = query.Where(entry => DateTime.Compare(entry.Date, afterDate) >= 0);
+      }
+
+      if(beforeDate != DateTime.MinValue)
+      {
+        query = query.Where(entry => DateTime.Compare(beforeDate, entry.Date) >= 0);
+      }
+
+      return query.ToList();
     }
 
     //POST api/messages
