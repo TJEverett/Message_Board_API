@@ -45,10 +45,15 @@ namespace MessageBoard.Controllers
     [HttpPut("{id}")]
     public void Put(int id, [FromBody] Message message)
     {
-      message.MessageId = id;
-      message.Date = DateTime.Now;
-      _db.Entry(message).State = EntityState.Modified;
-      _db.SaveChanges();
+      Message oldMessage = _db.Messages.FirstOrDefault(entry => entry.MessageId == id);
+      _db.Entry(oldMessage).State = EntityState.Detached;
+      if(message.UserName == oldMessage.UserName)
+      {
+        message.MessageId = id;
+        message.Date = DateTime.Now;
+        _db.Entry(message).State = EntityState.Modified;
+        _db.SaveChanges();
+      }
     }
 
     //DELETE api/messages/5
