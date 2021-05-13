@@ -80,11 +80,14 @@ namespace MessageBoard.Controllers
 
     //DELETE api/messages/5
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public void Delete(int id, [FromBody] string userName)
     {
       Message messageToDelete = _db.Messages.FirstOrDefault(entry => entry.MessageId == id);
-      _db.Messages.Remove(messageToDelete);
-      _db.SaveChanges();
+      if(messageToDelete.UserName == userName)
+      {
+        _db.Messages.Remove(messageToDelete);
+        _db.SaveChanges();
+      }
     }
   }
 }
