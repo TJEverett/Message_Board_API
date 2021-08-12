@@ -1,4 +1,5 @@
 using MessageBoard.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,6 +20,7 @@ namespace MessageBoard.Controllers
     }
 
     //GET api/messages
+    [AllowAnonymous]
     [HttpGet]
     public ActionResult<IEnumerable<Message>> Get(int groupId, string userName, DateTime afterDate, DateTime beforeDate)
     {
@@ -48,15 +50,23 @@ namespace MessageBoard.Controllers
     }
 
     //POST api/messages
+    [Authorize]
     [HttpPost]
     public void Post([FromBody] Message message)
     {
+      var currentUser = HttpContext.User;
+
       message.Date = DateTime.Now;
-      _db.Messages.Add(message);
-      _db.SaveChanges();
+      if(currentUser.HasClaim(c => c.Type == "Username"))
+      {
+        message.UserName = currentUser.Claims.FirstOrDefault(c => c.Type == "Username").Value;
+        _db.Messages.Add(message);
+        _db.SaveChanges();
+      }
     }
 
     //GET api/messages/5
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public ActionResult<Message> Get(int id)
     {
@@ -64,9 +74,16 @@ namespace MessageBoard.Controllers
     }
 
     //PUT api/messages/5
+    [Authorize]
     [HttpPut("{id}")]
     public void Put(int id, [FromBody] Message message)
     {
+      var currentUser = HttpContext.User;
+      if (currentUser.HasClaim(c => c.Type == "Username"))
+      {
+        message.UserName = currentUser.Claims.FirstOrDefault(c => c.Type == "Username").Value;
+      }
+
       Message oldMessage = _db.Messages.FirstOrDefault(entry => entry.MessageId == id);
       _db.Entry(oldMessage).State = EntityState.Detached;
       if(message.UserName == oldMessage.UserName)
@@ -79,11 +96,19 @@ namespace MessageBoard.Controllers
     }
 
     //DELETE api/messages/5
+    [Authorize]
     [HttpDelete("{id}")]
-    public void Delete(int id, [FromBody] string userName)
+    public void Delete(int id)
     {
+      var currentUser = HttpContext.User;
+      string username = null;
+      if (currentUser.HasClaim(c => c.Type == "Username"))
+      {
+        username = currentUser.Claims.FirstOrDefault(c => c.Type == "Username").Value;
+      }
+
       Message messageToDelete = _db.Messages.FirstOrDefault(entry => entry.MessageId == id);
-      if(messageToDelete.UserName == userName)
+      if(messageToDelete.UserName == username)
       {
         _db.Messages.Remove(messageToDelete);
         _db.SaveChanges();

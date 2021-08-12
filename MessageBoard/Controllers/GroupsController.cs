@@ -3,6 +3,7 @@ using MessageBoard.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MessageBoard.Controllers
 {
@@ -18,6 +19,7 @@ namespace MessageBoard.Controllers
     }
 
     //GET api/groups
+    [AllowAnonymous]
     [HttpGet]
     public ActionResult<IEnumerable<Group>> Get()
     {
@@ -25,6 +27,7 @@ namespace MessageBoard.Controllers
     }
 
     //POST api/groups
+    [Authorize]
     [HttpPost]
     public void Post([FromBody] Group group)
     {
@@ -33,6 +36,7 @@ namespace MessageBoard.Controllers
     }
 
     //GET api/groups/5
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public ActionResult<Group> Get(int id)
     {
